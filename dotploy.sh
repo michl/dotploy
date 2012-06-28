@@ -37,6 +37,26 @@
 #
 ##################################################################################
 
+#
+# Function: normalize
+#
+# Normalize a given path.
+# Do not follow symlinks.
+# If the given parameter is a file, normalize parent directory
+#
+# Parameters:
+#	$1	Path to normalize
+#
+normalize() {
+	local repath=$1
+	cd $repath 2> /dev/null
+	if [ $? -eq 1 ]; then
+		repath=$(dirname $repath)
+		cd $repath
+	fi
+	echo $(pwd)
+}
+
 IFS=$'\n'
 
 PRUNE=0
@@ -69,9 +89,9 @@ shift $((OPTIND - 1))
 # get real user name
 USER=$(id -nu)
 
-DOTSHOME=$(realpath $1)
+DOTSHOME=$(normalize $1)
 DOTSREPO=$DOTSHOME/__DOTDIR
-[ -n "$2" ] && DESTHOME=$(realpath $2) || DESTHOME=$HOME
+[ -n "$2" ] && DESTHOME=$(normalize $2) || DESTHOME=$HOME
 
 # die if it is not a dotsrepo
 [ -d $DOTSHOME ] && [ -d $DOTSREPO ] || exit 1
